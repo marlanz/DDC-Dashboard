@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import AppShell from "@/components/AppShell";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -20,8 +21,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={`${inter.variable} h-full`} suppressHydrationWarning>
-      <body className="h-full antialiased">{children}</body>
+    <html
+      lang="vi"
+      className={`${inter.variable} h-full`}
+      suppressHydrationWarning
+    >
+      <body className="h-full antialiased">
+        <AppShell>{children}</AppShell>
+      </body>
     </html>
   );
 }

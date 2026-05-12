@@ -1,119 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import TopHeader from "@/components/TopHeader";
-import DashboardContent from "@/components/DashboardContent";
 
-const PAGE_TITLES: Record<string, string> = {
-  dashboard: "Dashboard",
-  equipment: "Equipment Registry",
-  factories: "Factory Management",
-  workcenters: "Work Centers",
-  maintenance: "Maintenance Schedule",
-  reports: "Reports & Analytics",
-  import: "Import Excel",
-  settings: "System Settings",
-};
+interface AppShellProps {
+  children: React.ReactNode;
+}
 
-export default function AppShell() {
-  const [collapsed, setCollapsed] = useState(false);
-  const [activePage, setActivePage] = useState("dashboard");
+export default function AppShell({ children }: AppShellProps) {
   const [darkMode, setDarkMode] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
 
+  // Dark mode
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
   return (
     <div
+      className="flex h-screen overflow-hidden"
       style={{
-        display: "flex",
-        height: "100vh",
-        overflow: "hidden",
         background: "var(--color-background)",
       }}
     >
-      <Sidebar
-        collapsed={collapsed}
-        onToggle={() => setCollapsed((c) => !c)}
-        activePage={activePage}
-        onNavigate={setActivePage}
-      />
+      {/* Sidebar */}
+      <Sidebar />
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      {/* Main content */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Global header */}
         <TopHeader
-          title={PAGE_TITLES[activePage] || "Dashboard"}
           darkMode={darkMode}
           onToggleDark={() => setDarkMode((d) => !d)}
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
         />
 
+        {/* Page content */}
         <main
+          className="flex-1 overflow-y-auto"
           style={{
-            flex: 1,
-            overflowY: "auto",
             background: "var(--color-background)",
           }}
         >
-          {activePage === "dashboard" ? (
-            <DashboardContent searchValue={searchValue} />
-          ) : activePage === "equipment" ? (
-            <DashboardContent searchValue={searchValue} />
-          ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100%",
-                gap: "16px",
-                color: "var(--color-text-muted)",
-              }}
-            >
-              <div
-                style={{
-                  width: "64px",
-                  height: "64px",
-                  borderRadius: "16px",
-                  background: "rgba(233,34,39,0.08)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "28px",
-                }}
-              >
-                🚧
-              </div>
-              <div style={{ fontWeight: 700, fontSize: "18px", color: "var(--color-text-primary)" }}>
-                {PAGE_TITLES[activePage]}
-              </div>
-              <div style={{ fontSize: "14px", textAlign: "center", maxWidth: "300px" }}>
-                This module is under development. Navigate to{" "}
-                <button
-                  onClick={() => setActivePage("dashboard")}
-                  style={{
-                    color: "rgb(233,34,39)",
-                    fontWeight: 600,
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                  }}
-                >
-                  Dashboard
-                </button>{" "}
-                to explore the equipment analytics.
-              </div>
-            </div>
-          )}
+          {children}
         </main>
       </div>
     </div>

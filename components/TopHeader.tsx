@@ -1,31 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Search,
-  Bell,
-  Download,
-  Sun,
-  Moon,
-  ChevronDown,
-} from "lucide-react";
+import { Search, Bell, Download, Sun, Moon, ChevronDown } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useSidebarStore } from "@/lib/store/useSidebarStore";
 
 interface TopHeaderProps {
-  title: string;
-  darkMode: boolean;
-  onToggleDark: () => void;
-  searchValue: string;
-  onSearchChange: (v: string) => void;
+  darkMode?: boolean;
+  onToggleDark?: () => void;
+  searchValue?: string;
+  onSearchChange?: (v: string) => void;
 }
 
+const PAGE_TITLES: Record<string, string> = {
+  "/dashboard": "Dashboard",
+  "/equipments": "Equipment Registry",
+  "/factories": "Factory Management",
+  "/workcenters": "Work Centers",
+  "/maintenance": "Maintenance Schedule",
+  "/reports": "Reports & Analytics",
+  "/import": "Import Excel",
+  "/settings": "System Settings",
+};
+
 export default function TopHeader({
-  title,
   darkMode,
   onToggleDark,
   searchValue,
-  onSearchChange,
 }: TopHeaderProps) {
   const [notifOpen, setNotifOpen] = useState(false);
+  const path = usePathname();
 
   return (
     <header
@@ -52,7 +56,7 @@ export default function TopHeader({
             margin: 0,
           }}
         >
-          {title}
+          {PAGE_TITLES[path]}
         </h1>
       </div>
 
@@ -78,7 +82,7 @@ export default function TopHeader({
         <input
           type="text"
           value={searchValue}
-          onChange={(e) => onSearchChange(e.target.value)}
+          // onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search equipment, factory, code..."
           style={{
             width: "100%",
@@ -107,7 +111,10 @@ export default function TopHeader({
       <div style={{ flex: 1 }} />
 
       {/* Export button */}
-      <button className="btn-brand" style={{ height: "34px", fontSize: "13px" }}>
+      <button
+        className="btn-brand"
+        style={{ height: "34px", fontSize: "13px" }}
+      >
         <Download size={14} />
         Export Report
       </button>
@@ -171,32 +178,82 @@ export default function TopHeader({
               }}
             >
               <span>Notifications</span>
-              <span style={{ fontSize: "11px", fontWeight: 500, color: "rgb(233,34,39)" }}>3 new</span>
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 500,
+                  color: "rgb(233,34,39)",
+                }}
+              >
+                3 new
+              </span>
             </div>
             {[
-              { title: "Maintenance Due", desc: "Cẩu trục 15T — B20101029 needs review", time: "2h ago", type: "warning" },
-              { title: "Inspection Alert", desc: "Robot hàn spot MA2010 inspection pending", time: "5h ago", type: "info" },
-              { title: "Equipment Offline", desc: "Máy nén khí GA55+ is inactive", time: "1d ago", type: "error" },
+              {
+                title: "Maintenance Due",
+                desc: "Cẩu trục 15T — B20101029 needs review",
+                time: "2h ago",
+                type: "warning",
+              },
+              {
+                title: "Inspection Alert",
+                desc: "Robot hàn spot MA2010 inspection pending",
+                time: "5h ago",
+                type: "info",
+              },
+              {
+                title: "Equipment Offline",
+                desc: "Máy nén khí GA55+ is inactive",
+                time: "1d ago",
+                type: "error",
+              },
             ].map((n, i) => (
               <div
                 key={i}
                 style={{
                   padding: "12px 16px",
-                  borderBottom: i < 2 ? "1px solid var(--color-border)" : "none",
+                  borderBottom:
+                    i < 2 ? "1px solid var(--color-border)" : "none",
                   display: "flex",
                   flexDirection: "column",
                   gap: "2px",
                   cursor: "pointer",
                   transition: "background 0.1s",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--color-surface-2)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "var(--color-surface-2)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
               >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontWeight: 600, fontSize: "13px" }}>{n.title}</span>
-                  <span style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>{n.time}</span>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span style={{ fontWeight: 600, fontSize: "13px" }}>
+                    {n.title}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      color: "var(--color-text-muted)",
+                    }}
+                  >
+                    {n.time}
+                  </span>
                 </div>
-                <span style={{ fontSize: "12px", color: "var(--color-text-secondary)" }}>{n.desc}</span>
+                <span
+                  style={{
+                    fontSize: "12px",
+                    color: "var(--color-text-secondary)",
+                  }}
+                >
+                  {n.desc}
+                </span>
               </div>
             ))}
           </div>

@@ -2,8 +2,13 @@
 
 import { useState, useMemo } from "react";
 import {
-  ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight,
-  Search, SlidersHorizontal,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  SlidersHorizontal,
 } from "lucide-react";
 import type { Equipment, EquipmentStatus } from "@/types/equipment";
 
@@ -14,7 +19,13 @@ const STATUS_MAP: Record<EquipmentStatus, { label: string; cls: string }> = {
   inspection: { label: "Inspection", cls: "badge-inspection" },
 };
 
-type SortKey = keyof Equipment | "factory" | "workCenter" | "brand" | "produceYear" | "group2";
+type SortKey =
+  | keyof Equipment
+  | "factory"
+  | "workCenter"
+  | "brand"
+  | "produceYear"
+  | "group2";
 type SortDir = "asc" | "desc" | null;
 
 function SortIcon({ dir }: { dir: SortDir }) {
@@ -31,54 +42,122 @@ interface ColDef {
 }
 
 const COLUMNS: ColDef[] = [
-  { key: "equipmentName", label: "Equipment Name", width: 180, render: (r) => (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <span style={{ fontWeight: 600, fontSize: "13px" }}>{r.equipmentName}</span>
-      <span style={{ fontSize: "11px", color: "var(--color-text-muted)", fontFamily: "monospace" }}>{r.equipmentCode}</span>
-    </div>
-  )},
-  { key: "group2", label: "Equipment Group", width: 160, render: (r) => (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <span style={{ fontSize: "12px" }}>{r.equipmentGroup.level2}</span>
-      <span style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>{r.equipmentGroup.level3}</span>
-    </div>
-  )},
-  { key: "factory", label: "Factory", width: 110, render: (r) => (
-    <span style={{ fontSize: "12px" }}>{r.organization.factory}</span>
-  )},
-  { key: "workCenter", label: "Work Center", width: 120, render: (r) => (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <span style={{ fontSize: "12px" }}>{r.organization.workCenter}</span>
-      <span style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>{r.organization.workshop}</span>
-    </div>
-  )},
-  { key: "brand", label: "Manufacturer", width: 130, render: (r) => (
-    <div style={{ display: "flex", flexDirection: "column" }}>
-      <span style={{ fontWeight: 500, fontSize: "12px" }}>{r.manufacturer.brand}</span>
-      <span style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>{r.manufacturer.model}</span>
-    </div>
-  )},
-  { key: "produceYear", label: "Year", width: 70, render: (r) => (
-    <span style={{ fontSize: "12px", fontFamily: "monospace", fontWeight: 600 }}>{r.manufacturer.produceYear}</span>
-  )},
-  { key: "installationLocation", label: "Location", width: 90, render: (r) => (
-    <span style={{ fontSize: "12px" }}>{r.installationLocation}</span>
-  )},
-  { key: "status", label: "Status", width: 120, render: (r) => {
-    const s = r.status || "active";
-    const info = STATUS_MAP[s];
-    return <span className={`badge ${info.cls}`}>{info.label}</span>;
-  }},
+  {
+    key: "equipmentName",
+    label: "Equipment Name",
+    width: 180,
+    render: (r) => (
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <span style={{ fontWeight: 600, fontSize: "13px" }}>
+          {r.equipmentName}
+        </span>
+        <span
+          style={{
+            fontSize: "11px",
+            color: "var(--color-text-muted)",
+            fontFamily: "monospace",
+          }}
+        >
+          {r.equipmentCode}
+        </span>
+      </div>
+    ),
+  },
+  {
+    key: "group2",
+    label: "Equipment Group",
+    width: 160,
+    render: (r) => (
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <span style={{ fontSize: "12px" }}>{r.equipmentGroup.level2}</span>
+        <span style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
+          {r.equipmentGroup.level3}
+        </span>
+      </div>
+    ),
+  },
+  {
+    key: "factory",
+    label: "Factory",
+    width: 110,
+    render: (r) => (
+      <span style={{ fontSize: "12px" }}>{r.organization.factory}</span>
+    ),
+  },
+  {
+    key: "workCenter",
+    label: "Work Center",
+    width: 120,
+    render: (r) => (
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <span style={{ fontSize: "12px" }}>{r.organization.workCenter}</span>
+        <span style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
+          {r.organization.workshop}
+        </span>
+      </div>
+    ),
+  },
+  {
+    key: "brand",
+    label: "Manufacturer",
+    width: 130,
+    render: (r) => (
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <span style={{ fontWeight: 500, fontSize: "12px" }}>
+          {r.manufacturer.brand}
+        </span>
+        <span style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
+          {r.manufacturer.model}
+        </span>
+      </div>
+    ),
+  },
+  {
+    key: "produceYear",
+    label: "Year",
+    width: 70,
+    render: (r) => (
+      <span
+        style={{ fontSize: "12px", fontFamily: "monospace", fontWeight: 600 }}
+      >
+        {r.manufacturer.produceYear}
+      </span>
+    ),
+  },
+  {
+    key: "installationLocation",
+    label: "Location",
+    width: 90,
+    render: (r) => (
+      <span style={{ fontSize: "12px" }}>{r.installationLocation}</span>
+    ),
+  },
+  {
+    key: "status",
+    label: "Status",
+    width: 120,
+    render: (r) => {
+      const s = r.status || "active";
+      const info = STATUS_MAP[s];
+      return <span className={`badge ${info.cls}`}>{info.label}</span>;
+    },
+  },
 ];
 
 function getVal(row: Equipment, key: SortKey): string | number {
   switch (key) {
-    case "factory": return row.organization.factory;
-    case "workCenter": return row.organization.workCenter;
-    case "brand": return row.manufacturer.brand;
-    case "produceYear": return row.manufacturer.produceYear;
-    case "group2": return row.equipmentGroup.level2;
-    default: return (row as any)[key] ?? "";
+    case "factory":
+      return row.organization.factory;
+    case "workCenter":
+      return row.organization.workCenter;
+    case "brand":
+      return row.manufacturer.brand;
+    case "produceYear":
+      return row.manufacturer.produceYear;
+    case "group2":
+      return row.equipmentGroup.level2;
+    default:
+      return "";
   }
 }
 
@@ -86,11 +165,15 @@ const PAGE_SIZES = [10, 20, 50];
 
 interface EquipmentTableProps {
   data: Equipment[];
-  searchValue: string;
+  searchValue?: string;
   onRowClick: (row: Equipment) => void;
 }
 
-export default function EquipmentTable({ data, searchValue, onRowClick }: EquipmentTableProps) {
+export default function EquipmentTable({
+  data,
+  searchValue,
+  onRowClick,
+}: EquipmentTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("no");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -117,7 +200,7 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
         r.equipmentCode.toLowerCase().includes(q) ||
         r.organization.factory.toLowerCase().includes(q) ||
         r.manufacturer.brand.toLowerCase().includes(q) ||
-        r.equipmentGroup.level2.toLowerCase().includes(q)
+        r.equipmentGroup.level2.toLowerCase().includes(q),
     );
   }, [data, searchValue]);
 
@@ -126,7 +209,10 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
     return [...filtered].sort((a, b) => {
       const av = getVal(a, sortKey);
       const bv = getVal(b, sortKey);
-      const cmp = typeof av === "number" ? av - (bv as number) : String(av).localeCompare(String(bv));
+      const cmp =
+        typeof av === "number"
+          ? av - (bv as number)
+          : String(av).localeCompare(String(bv));
       return sortDir === "asc" ? cmp : -cmp;
     });
   }, [filtered, sortKey, sortDir]);
@@ -150,7 +236,10 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
   };
 
   return (
-    <div className="card" style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div
+      className="card"
+      style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
+    >
       {/* Table Header Bar */}
       <div
         style={{
@@ -162,7 +251,9 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
           flexWrap: "wrap",
         }}
       >
-        <div style={{ fontWeight: 700, fontSize: "15px" }}>Equipment Registry</div>
+        <div style={{ fontWeight: 700, fontSize: "15px" }}>
+          Equipment Registry
+        </div>
         <span
           style={{
             fontSize: "12px",
@@ -176,16 +267,33 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
           {sorted.length} records
         </span>
         {selected.size > 0 && (
-          <span style={{ fontSize: "12px", color: "var(--color-text-secondary)", marginLeft: "4px" }}>
+          <span
+            style={{
+              fontSize: "12px",
+              color: "var(--color-text-secondary)",
+              marginLeft: "4px",
+            }}
+          >
             {selected.size} selected
           </span>
         )}
         <div style={{ flex: 1 }} />
-        <div style={{ fontSize: "13px", color: "var(--color-text-secondary)", display: "flex", alignItems: "center", gap: "6px" }}>
+        <div
+          style={{
+            fontSize: "13px",
+            color: "var(--color-text-secondary)",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+          }}
+        >
           <span>Show</span>
           <select
             value={pageSize}
-            onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1);
+            }}
             style={{
               border: "1px solid var(--color-border)",
               borderRadius: "6px",
@@ -196,7 +304,11 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
               cursor: "pointer",
             }}
           >
-            {PAGE_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
+            {PAGE_SIZES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
           </select>
           <span>per page</span>
         </div>
@@ -214,7 +326,10 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
                     height: "14px",
                     border: `2px solid ${selected.size === pageData.length && pageData.length > 0 ? "rgb(233,34,39)" : "var(--color-border)"}`,
                     borderRadius: "3px",
-                    background: selected.size === pageData.length && pageData.length > 0 ? "rgb(233,34,39)" : "transparent",
+                    background:
+                      selected.size === pageData.length && pageData.length > 0
+                        ? "rgb(233,34,39)"
+                        : "transparent",
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
@@ -225,7 +340,15 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
                   onClick={toggleAll}
                 >
                   {selected.size === pageData.length && pageData.length > 0 && (
-                    <span style={{ color: "white", fontSize: "9px", fontWeight: 800 }}>✓</span>
+                    <span
+                      style={{
+                        color: "white",
+                        fontSize: "9px",
+                        fontWeight: 800,
+                      }}
+                    >
+                      ✓
+                    </span>
                   )}
                 </div>
               </th>
@@ -235,7 +358,13 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
                   style={{ width: col.width, cursor: "pointer" }}
                   onClick={() => handleSort(col.key)}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                    }}
+                  >
                     {col.label}
                     <SortIcon dir={sortKey === col.key ? sortDir : null} />
                   </div>
@@ -246,11 +375,27 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
           <tbody>
             {pageData.length === 0 ? (
               <tr>
-                <td colSpan={COLUMNS.length + 1} style={{ textAlign: "center", padding: "40px", color: "var(--color-text-muted)" }}>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                <td
+                  colSpan={COLUMNS.length + 1}
+                  style={{
+                    textAlign: "center",
+                    padding: "40px",
+                    color: "var(--color-text-muted)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
                     <Search size={32} style={{ opacity: 0.3 }} />
                     <span style={{ fontWeight: 600 }}>No equipment found</span>
-                    <span style={{ fontSize: "13px" }}>Try adjusting your filters or search query</span>
+                    <span style={{ fontSize: "13px" }}>
+                      Try adjusting your filters or search query
+                    </span>
                   </div>
                 </td>
               </tr>
@@ -265,14 +410,21 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
                     onClick={() => onRowClick(row)}
                     style={{ position: "relative" }}
                   >
-                    <td onClick={(e) => { e.stopPropagation(); toggleSelect(row.equipmentCode, e); }}>
+                    <td
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSelect(row.equipmentCode, e);
+                      }}
+                    >
                       <div
                         style={{
                           width: "14px",
                           height: "14px",
                           border: `2px solid ${isSelected ? "rgb(233,34,39)" : "var(--color-border)"}`,
                           borderRadius: "3px",
-                          background: isSelected ? "rgb(233,34,39)" : "transparent",
+                          background: isSelected
+                            ? "rgb(233,34,39)"
+                            : "transparent",
                           cursor: "pointer",
                           display: "flex",
                           alignItems: "center",
@@ -281,7 +433,17 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
                           transition: "all 0.15s",
                         }}
                       >
-                        {isSelected && <span style={{ color: "white", fontSize: "9px", fontWeight: 800 }}>✓</span>}
+                        {isSelected && (
+                          <span
+                            style={{
+                              color: "white",
+                              fontSize: "9px",
+                              fontWeight: 800,
+                            }}
+                          >
+                            ✓
+                          </span>
+                        )}
                       </div>
                     </td>
                     {COLUMNS.map((col) => (
@@ -306,15 +468,22 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
           justifyContent: "space-between",
         }}
       >
-        <span style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}>
-          Showing {Math.min((page - 1) * pageSize + 1, sorted.length)}–{Math.min(page * pageSize, sorted.length)} of {sorted.length}
+        <span
+          style={{ fontSize: "13px", color: "var(--color-text-secondary)" }}
+        >
+          Showing {Math.min((page - 1) * pageSize + 1, sorted.length)}–
+          {Math.min(page * pageSize, sorted.length)} of {sorted.length}
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
             className="btn-ghost"
-            style={{ height: "30px", padding: "0 8px", opacity: page === 1 ? 0.4 : 1 }}
+            style={{
+              height: "30px",
+              padding: "0 8px",
+              opacity: page === 1 ? 0.4 : 1,
+            }}
           >
             <ChevronLeft size={14} />
           </button>
@@ -350,7 +519,11 @@ export default function EquipmentTable({ data, searchValue, onRowClick }: Equipm
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
             className="btn-ghost"
-            style={{ height: "30px", padding: "0 8px", opacity: page === totalPages ? 0.4 : 1 }}
+            style={{
+              height: "30px",
+              padding: "0 8px",
+              opacity: page === totalPages ? 0.4 : 1,
+            }}
           >
             <ChevronRight size={14} />
           </button>

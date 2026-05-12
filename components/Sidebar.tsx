@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Cpu,
@@ -13,26 +15,25 @@ import {
   ChevronRight,
   Zap,
 } from "lucide-react";
-
-interface SidebarProps {
-  collapsed: boolean;
-  onToggle: () => void;
-  activePage: string;
-  onNavigate: (page: string) => void;
-}
+import { useSidebarStore } from "@/lib/store/useSidebarStore";
 
 const navItems = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "equipment", label: "Equipment", icon: Cpu },
-  { id: "factories", label: "Factories", icon: Factory },
-  { id: "workcenters", label: "Work Centers", icon: GitBranch },
-  { id: "maintenance", label: "Maintenance", icon: Wrench },
-  { id: "reports", label: "Reports", icon: BarChart3 },
-  { id: "import", label: "Import Excel", icon: FileSpreadsheet },
-  { id: "settings", label: "Settings", icon: Settings },
+  { href: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "equipments", label: "Equipment", icon: Cpu },
+  { href: "factories", label: "Factories", icon: Factory },
+  { href: "workcenters", label: "Work Centers", icon: GitBranch },
+  { href: "maintenance", label: "Maintenance", icon: Wrench },
+  { href: "reports", label: "Reports", icon: BarChart3 },
+  { href: "import", label: "Import Excel", icon: FileSpreadsheet },
+  { href: "settings", label: "Settings", icon: Settings },
 ];
 
-export default function Sidebar({ collapsed, onToggle, activePage, onNavigate }: SidebarProps) {
+export default function Sidebar() {
+  const pathname = usePathname();
+  const { collapsed, setCollapsed, hydrated } = useSidebarStore();
+
+  if (!hydrated) return null;
+
   return (
     <aside
       style={{
@@ -44,8 +45,6 @@ export default function Sidebar({ collapsed, onToggle, activePage, onNavigate }:
         flexDirection: "column",
         transition: "width 0.25s ease, min-width 0.25s ease",
         overflow: "hidden",
-        position: "relative",
-        zIndex: 20,
       }}
     >
       {/* Logo */}
@@ -57,7 +56,6 @@ export default function Sidebar({ collapsed, onToggle, activePage, onNavigate }:
           padding: collapsed ? "0 20px" : "0 16px",
           borderBottom: "1px solid var(--color-border)",
           gap: "10px",
-          overflow: "hidden",
         }}
       >
         <div
@@ -74,48 +72,75 @@ export default function Sidebar({ collapsed, onToggle, activePage, onNavigate }:
         >
           <Zap size={16} color="white" strokeWidth={2.5} />
         </div>
+
         {!collapsed && (
-          <div style={{ overflow: "hidden" }}>
-            <div style={{ fontWeight: 700, fontSize: "15px", color: "var(--color-text-primary)", whiteSpace: "nowrap" }}>
+          <div>
+            <div
+              style={{
+                fontWeight: 700,
+                fontSize: "15px",
+                color: "var(--color-text-primary)",
+              }}
+            >
               EMS Pro
             </div>
-            <div style={{ fontSize: "11px", color: "var(--color-text-muted)", whiteSpace: "nowrap" }}>
+
+            <div
+              style={{
+                fontSize: "11px",
+                color: "var(--color-text-muted)",
+              }}
+            >
               v2.4.1
             </div>
           </div>
         )}
       </div>
 
-      {/* Nav */}
-      <nav style={{ flex: 1, padding: "12px 8px", display: "flex", flexDirection: "column", gap: "2px" }}>
+      {/* Navigation */}
+      <nav
+        style={{
+          flex: 1,
+          padding: "12px 8px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "2px",
+        }}
+      >
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activePage === item.id;
+
+          const formattedPathname = `/${item.href}`;
+
+          const isActive = pathname === formattedPathname;
+
           return (
-            <button
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
+            <Link
+              key={item.href}
+              href={`/${item.href}`}
               className={`sidebar-item${isActive ? " active" : ""}`}
               style={{
-                width: "100%",
-                border: "none",
                 justifyContent: collapsed ? "center" : "flex-start",
                 padding: collapsed ? "8px" : "8px 12px",
               }}
               title={collapsed ? item.label : undefined}
+              // onClick={() => setPage(PAGE_TITLES[item.href])}
             >
-              <Icon size={18} strokeWidth={isActive ? 2.5 : 2} className="icon" />
-              {!collapsed && (
-                <span style={{ opacity: 1, transition: "opacity 0.2s" }}>{item.label}</span>
-              )}
-            </button>
+              <Icon
+                size={18}
+                strokeWidth={isActive ? 2.5 : 2}
+                className="icon"
+              />
+
+              {!collapsed && <span>{item.label}</span>}
+            </Link>
           );
         })}
       </nav>
 
-      {/* Collapse toggle */}
+      {/* Collapse button */}
       <button
-        onClick={onToggle}
+        onClick={() => setCollapsed(!collapsed)}
         style={{
           margin: "12px 8px",
           padding: "8px",
@@ -127,15 +152,22 @@ export default function Sidebar({ collapsed, onToggle, activePage, onNavigate }:
           alignItems: "center",
           justifyContent: "center",
           color: "var(--color-text-secondary)",
-          transition: "all 0.15s ease",
           gap: "6px",
         }}
-        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
-        {collapsed ? <ChevronRight size={16} /> : (
+        {collapsed ? (
+          <ChevronRight size={16} />
+        ) : (
           <>
             <ChevronLeft size={16} />
-            <span style={{ fontSize: "13px", fontWeight: 500, whiteSpace: "nowrap" }}>Collapse</span>
+            <span
+              style={{
+                fontSize: "13px",
+                fontWeight: 500,
+              }}
+            >
+              Collapse
+            </span>
           </>
         )}
       </button>
