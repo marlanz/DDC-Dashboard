@@ -2,19 +2,9 @@
 
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp, X, RotateCcw, Check } from "lucide-react";
+import type { EquipmentFilters } from "@/types/equipment";
 
-export interface EquipmentFilters {
-  factories: string[];
-  workshops: string[];
-  workCenters: string[];
-  layouts: string[];
-  group1s: string[];
-  group2s: string[];
-  brands: string[];
-  countries: string[];
-  produceYears: string[];
-  statuses: string[];
-}
+export type { EquipmentFilters };
 
 export const EMPTY_FILTERS: EquipmentFilters = {
   factories: [], workshops: [], workCenters: [], layouts: [],
