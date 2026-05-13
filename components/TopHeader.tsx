@@ -1,16 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Bell, Download, Sun, Moon, ChevronDown } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
+import { Download, Sun, Moon, ChevronDown, LogOut } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+
 import Image from "next/image";
 import { useAuthStore } from "@/lib/store/useAuthStore";
+import { authClient } from "@/lib/auth-client";
 
 interface TopHeaderProps {
   darkMode?: boolean;
   onToggleDark?: () => void;
-  searchValue?: string;
   onSearchChange?: (v: string) => void;
 }
 
@@ -25,14 +25,13 @@ const PAGE_TITLES: Record<string, string> = {
   "/settings": "System Settings",
 };
 
-export default function TopHeader({
-  darkMode,
-  onToggleDark,
-  searchValue,
-}: TopHeaderProps) {
-  const [notifOpen, setNotifOpen] = useState(false);
+export default function TopHeader({ darkMode, onToggleDark }: TopHeaderProps) {
+  // Removed unused notifOpen state
+  const [menuOpen, setMenuOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
+  const clearUser = useAuthStore((state) => state.clearUser);
   const path = usePathname();
+  const router = useRouter();
 
   const avatar = user?.image;
 
@@ -89,7 +88,7 @@ export default function TopHeader({
       </button>
 
       {/* Notifications */}
-      <div style={{ position: "relative" }}>
+      {/* <div style={{ position: "relative" }}>
         <button
           className="btn-ghost"
           style={{ height: "34px", padding: "0 10px", position: "relative" }}
@@ -110,12 +109,13 @@ export default function TopHeader({
             }}
           />
         </button>
-      </div>
+      </div> */}
 
       {/* User avatar */}
       <button
         className="btn-ghost"
         style={{ height: "34px", padding: "0 10px", gap: "8px" }}
+        onClick={() => setMenuOpen(!menuOpen)}
       >
         {avatar && (
           <Image
@@ -131,6 +131,87 @@ export default function TopHeader({
         </span>
         <ChevronDown size={13} />
       </button>
+
+      {menuOpen && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 8px)",
+            right: 0,
+            width: "150px",
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "12px",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+            zIndex: 100,
+            overflow: "hidden",
+          }}
+        >
+          {/* <div
+            style={{
+              padding: "12px 16px",
+              borderBottom: "1px solid var(--color-border)",
+              fontWeight: 600,
+              fontSize: "14px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span>Notifications</span>
+            <span
+              style={{
+                fontSize: "11px",
+                fontWeight: 500,
+                color: "rgb(233,34,39)",
+              }}
+            >
+              3 new
+            </span> */}
+          {/* </div> */}
+
+          <div
+            style={{
+              padding: "12px 16px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "2px",
+              cursor: "pointer",
+              transition: "background 0.1s",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "var(--color-surface-2)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "transparent")
+            }
+            onClick={async () => {
+              await authClient.signOut();
+              clearUser();
+              router.push("/login");
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+              }}
+            >
+              <LogOut size={14} color="rgb(233,34,39)" strokeWidth={2.5} />
+              <span
+                style={{
+                  fontWeight: 600,
+                  fontSize: "13px",
+                  color: "rgb(233,34,39)",
+                }}
+              >
+                Đăng xuất
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

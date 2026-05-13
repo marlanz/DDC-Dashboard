@@ -14,7 +14,7 @@ export const auth = betterAuth({
   trustedOrigins: [
     "http://localhost:3000",
     "https://demodashboard-96cipe4ko-phanhfedevs-projects.vercel.app",
-  ],
+  ], // TODO: FIX TRUSTED ORIGINS
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
