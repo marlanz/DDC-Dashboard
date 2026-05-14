@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { data } from "@/data";
 import type { Equipment } from "@/types/equipment";
 import KpiCards from "@/components/KpiCards";
 import Filters, { FilterState } from "@/components/Filters";
@@ -16,10 +15,13 @@ import EquipmentTable from "@/components/EquipmentTable";
 import DetailDrawer from "@/components/DetailDrawer";
 
 interface DashboardContentProps {
+  /** Pre-fetched equipment data from the server (replaces static mock data). */
+  initialData: Equipment[];
   searchValue?: string;
 }
 
 export default function DashboardContent({
+  initialData,
   searchValue,
 }: DashboardContentProps) {
   const [filters, setFilters] = useState<FilterState>({
@@ -33,30 +35,31 @@ export default function DashboardContent({
     null,
   );
 
-  // Derived options
+  // Derived filter options from the full dataset
   const factories = useMemo(
-    () => [...new Set(data.map((d) => d.organization.factory))].sort(),
-    [],
+    () => [...new Set(initialData.map((d) => d.organization.factory))].sort(),
+    [initialData],
   );
   const groups = useMemo(
-    () => [...new Set(data.map((d) => d.equipmentGroup.level1))].sort(),
-    [],
+    () => [...new Set(initialData.map((d) => d.equipmentGroup.level1))].sort(),
+    [initialData],
   );
   const workCenters = useMemo(
-    () => [...new Set(data.map((d) => d.organization.workCenter))].sort(),
-    [],
+    () =>
+      [...new Set(initialData.map((d) => d.organization.workCenter))].sort(),
+    [initialData],
   );
   const produceYears = useMemo(
     () =>
-      [...new Set(data.map((d) => d.manufacturer.produceYear))]
+      [...new Set(initialData.map((d) => d.manufacturer.produceYear))]
         .filter((y): y is number => y !== null)
         .sort(),
-    [],
+    [initialData],
   );
 
-  // Filtered data
+  // Filtered dataset based on active filter state
   const filtered = useMemo(() => {
-    return data.filter((eq) => {
+    return initialData.filter((eq) => {
       if (
         filters.factories.length > 0 &&
         !filters.factories.includes(eq.organization.factory)
@@ -84,9 +87,9 @@ export default function DashboardContent({
         return false;
       return true;
     });
-  }, [filters]);
+  }, [initialData, filters]);
 
-  // KPI stats
+  // KPI stats derived from filtered data
   const kpi = useMemo(() => {
     const totalFactories = new Set(filtered.map((d) => d.organization.factory))
       .size;
@@ -107,7 +110,7 @@ export default function DashboardContent({
     };
   }, [filtered]);
 
-  // Chart data
+  // Chart datasets
   const byFactory = useMemo(() => {
     const map: Record<string, number> = {};
     filtered.forEach((d) => {

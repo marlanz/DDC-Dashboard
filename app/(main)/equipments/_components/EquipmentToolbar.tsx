@@ -332,10 +332,11 @@ export default function EquipmentToolbar({
               <button
                 id="toolbar-import-json-btn"
                 role="menuitem"
-                onClick={() => {
-                  setImportMenuOpen(false);
-                  onImportJson?.();
-                }}
+                // onClick={() => {
+                //   setImportMenuOpen(false);
+                //   onImportJson?.();
+                // }}
+                disabled={true}
                 style={{
                   width: "100%",
                   display: "flex",
