@@ -198,23 +198,21 @@ export default function ImportExcelModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<File | null>(null);
 
-  // Reset when opened
-  useEffect(() => {
-    if (open) {
-      setStep("idle");
-      setDragOver(false);
-      setFileName("");
-      setFatalError("");
-      setResult(null);
-      fileRef.current = null;
-    }
-  }, [open]);
+  const closeModal = () => {
+    onClose();
+    setStep("idle");
+    setDragOver(false);
+    setFileName("");
+    setFatalError("");
+    setResult(null);
+    fileRef.current = null;
+  };
 
   // ESC to close
   useEffect(() => {
     if (!open) return;
     const h = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") closeModal();
     };
     document.addEventListener("keydown", h);
     return () => document.removeEventListener("keydown", h);
@@ -310,14 +308,14 @@ export default function ImportExcelModal({
     ) : null;
 
   const isLoading = step === "uploading";
-  const canSubmit = step === "ready" && !!fileRef.current;
+  const canSubmit = step === "ready";
   const isDone = step === "done";
 
   return (
     <>
       {/* Backdrop */}
       <div
-        onClick={onClose}
+        onClick={() => closeModal()}
         style={{
           position: "fixed",
           inset: 0,
@@ -397,7 +395,7 @@ export default function ImportExcelModal({
           </div>
           <button
             id="import-excel-modal-close"
-            onClick={onClose}
+            onClick={() => closeModal()}
             aria-label="Close"
             style={{
               marginLeft: "auto",
@@ -571,7 +569,7 @@ export default function ImportExcelModal({
         >
           <button
             id="import-excel-cancel-btn"
-            onClick={onClose}
+            onClick={() => closeModal()}
             style={{
               height: 34,
               padding: "0 16px",
@@ -598,9 +596,7 @@ export default function ImportExcelModal({
                 border: "none",
                 borderRadius: 7,
                 background:
-                  canSubmit && !isLoading
-                    ? "#22c55e"
-                    : "rgba(34,197,94,0.4)",
+                  canSubmit && !isLoading ? "#22c55e" : "rgba(34,197,94,0.4)",
                 color: "white",
                 fontSize: 13,
                 fontWeight: 600,
