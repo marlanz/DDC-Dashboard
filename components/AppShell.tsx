@@ -9,7 +9,7 @@ interface AppShellProps {
   children: React.ReactNode;
 }
 
-export default function AppShell({ children }: AppShellProps) {
+export default function ThemeProvider({ children }: AppShellProps) {
   const { darkMode, setDarkMode, hydrated } = useSidebarStore();
 
   useEffect(() => {

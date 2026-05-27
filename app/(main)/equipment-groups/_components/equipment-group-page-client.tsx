@@ -2,9 +2,11 @@
 
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
-import { Cpu, Layers, Network, Box, Trash2, X } from "lucide-react";
+import { Cpu, Layers, Network, Box } from "lucide-react";
 
-import { EquipmentGroupToolbar } from "@/app/(main)/equipment-groups/_components/EquipmentGroupToolbar";
+import { EquipmentGroupTreeToolbar, type ViewMode } from "@/components/equipment-groups/equipment-group-toolbar";
+import { EquipmentGroupTreeTable, type TreeNode } from "@/components/equipment-groups/equipment-group-tree-table";
+import { EquipmentGroupDetailPanel } from "@/components/equipment-groups/equipment-group-detail-panel";
 import { EquipmentGroupTable } from "./equipment-group-table";
 import { EquipmentGroupDialog } from "./equipment-group-dialog";
 import { DeleteEquipmentGroupDialog } from "./delete-equipment-group-dialog";
@@ -124,14 +126,9 @@ function GroupKpiStrip({
               <Icon size={17} />
             </div>
             <div>
-              <div
-                style={{ fontSize: 22, fontWeight: 800, color, lineHeight: 1 }}
-              >
+              <div style={{ fontSize: 22, fontWeight: 800, color, lineHeight: 1 }}>
                 {isLoading ? (
-                  <div
-                    className="skeleton"
-                    style={{ height: 22, width: 36, borderRadius: 4 }}
-                  />
+                  <div className="skeleton" style={{ height: 22, width: 36, borderRadius: 4 }} />
                 ) : (
                   value
                 )}
@@ -157,7 +154,7 @@ function GroupKpiStrip({
 }
 
 // ---------------------------------------------------------------------------
-// Page client
+// Page client — now supports Tree + Flat toggle
 // ---------------------------------------------------------------------------
 
 export function EquipmentGroupPageClient() {
@@ -174,16 +171,20 @@ export function EquipmentGroupPageClient() {
   const invalidate = async () => {}; // ⭐ DELETE
   // ─────────────────────────────────────────────────────────────────
 
-  // Search state lifted here — passed to both toolbar (input) and table (filter)
+  // ── View toggle ───────────────────────────────────────────────────
+  const [viewMode, setViewMode] = useState<ViewMode>("tree");
+
+  // ── Search ────────────────────────────────────────────────────────
   const [search, setSearch] = useState("");
 
-  // Filtered count bubbled up from TanStack Table instance → drives results bar
+  // ── Flat table filtered count ─────────────────────────────────────
   const [filteredCount, setFilteredCount] = useState(groups.length);
 
-  // Multi-select state — bubbled up from the table for bulk actions
+  // ── Tree selection (detail panel) ─────────────────────────────────
+  const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
+
+  // ── Flat table multi-select ───────────────────────────────────────
   const [selectedGroups, setSelectedGroups] = useState<EquipmentGroupRecord[]>([]);
-  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
-  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   // ── Modal state ───────────────────────────────────────────────────
   const [createOpen, setCreateOpen] = useState(false);
@@ -192,12 +193,13 @@ export function EquipmentGroupPageClient() {
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   // ── Handlers ──────────────────────────────────────────────────────
-  const handleEdit = useCallback((group: EquipmentGroupRecord) => {
-    setEditTarget(group);
+  const handleEdit = useCallback((record: EquipmentGroupRecord) => {
+    setEditTarget(record);
+    setSelectedNode(null);
   }, []);
 
-  const handleDeleteRequest = useCallback((group: EquipmentGroupRecord) => {
-    setDeleteTarget(group);
+  const handleDeleteRequest = useCallback((record: EquipmentGroupRecord) => {
+    setDeleteTarget(record);
     setDeleteOpen(true);
   }, []);
 
@@ -207,16 +209,15 @@ export function EquipmentGroupPageClient() {
         const res = await fetch(`/api/equipment-groups/${group._id}`, {
           method: "DELETE",
         });
-
         if (!res.ok) {
           const err: ApiErrorResponse = await res.json();
           toast.error(err.error ?? "Xoá thất bại. Vui lòng thử lại.");
           return;
         }
-
         toast.success("Đã xoá nhóm thiết bị.");
         setDeleteOpen(false);
         setDeleteTarget(null);
+        setSelectedNode(null);
         await invalidate();
         refetch();
       } catch {
@@ -231,53 +232,11 @@ export function EquipmentGroupPageClient() {
     refetch();
   }, [invalidate, refetch]);
 
-  const handleBulkDelete = useCallback(async () => {
-    if (selectedGroups.length === 0) return;
-    setIsBulkDeleting(true);
-    let successCount = 0;
-    let failCount = 0;
-    try {
-      await Promise.all(
-        selectedGroups.map(async (group) => {
-          try {
-            const res = await fetch(`/api/equipment-groups/${group._id}`, {
-              method: "DELETE",
-            });
-            if (res.ok) {
-              successCount++;
-            } else {
-              failCount++;
-            }
-          } catch {
-            failCount++;
-          }
-        }),
-      );
-      if (successCount > 0) {
-        toast.success(`Đã xoá ${successCount} nhóm thiết bị.`);
-        await invalidate();
-        refetch();
-      }
-      if (failCount > 0) {
-        toast.error(`${failCount} nhóm không thể xoá. Vui lòng thử lại.`);
-      }
-    } finally {
-      setIsBulkDeleting(false);
-      setBulkDeleteOpen(false);
-      setSelectedGroups([]);
-    }
-  }, [selectedGroups, invalidate, refetch]);
+  const handleNodeSelect = useCallback((node: TreeNode | null) => {
+    setSelectedNode(node);
+  }, []);
 
   // ── Render ────────────────────────────────────────────────────────
-  //
-  // Mirrors EquipmentWrapper layout exactly:
-  //   root          (flex column, height:100%, overflow:hidden)
-  //     ├─ Toolbar  (EquipmentGroupToolbar — search + actions, flexShrink:0)
-  //     ├─ Error    (conditional banner, flexShrink:0)
-  //     ├─ KPI      (GroupKpiStrip, flexShrink:0)
-  //     ├─ Results  (count bar, flexShrink:0)
-  //     └─ Body     (flex:1, overflow:hidden → table fills it)
-  //
   return (
     <div
       style={{
@@ -288,14 +247,15 @@ export function EquipmentGroupPageClient() {
         background: "var(--color-background)",
       }}
     >
-      {/* ── Toolbar (search lives here, not in the table) ── */}
-      <EquipmentGroupToolbar
+      {/* ── Toolbar ── */}
+      <EquipmentGroupTreeToolbar
         search={search}
         onSearchChange={setSearch}
         onAddGroup={() => setCreateOpen(true)}
         onRefresh={refetch}
-        selectedCount={selectedGroups.length}
-        onDeleteSelected={() => setBulkDeleteOpen(true)}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        selectedCount={viewMode === "flat" ? selectedGroups.length : 0}
         onClearSelection={() => setSelectedGroups([])}
       />
 
@@ -316,7 +276,7 @@ export function EquipmentGroupPageClient() {
         >
           <span style={{ fontWeight: 600 }}>⚠ Lỗi tải dữ liệu:</span>
           <span style={{ opacity: 0.85 }}>
-            {error instanceof Error ? error.message : "Unknown error"}
+            {(error as Error | null)?.message ?? "Unknown error"}
           </span>
           <button
             onClick={refetch}
@@ -337,10 +297,10 @@ export function EquipmentGroupPageClient() {
         </div>
       )}
 
-      {/* ── KPI strip (fixed — never scrolls) ── */}
+      {/* ── KPI strip ── */}
       <GroupKpiStrip groups={groups} isLoading={isLoading} />
 
-      {/* ── Results count bar (fixed — mirrors EquipmentWrapper) ── */}
+      {/* ── Results count bar ── */}
       <div
         style={{
           padding: "6px 16px",
@@ -353,29 +313,62 @@ export function EquipmentGroupPageClient() {
         }}
       >
         {isLoading ? (
-          <div
-            className="skeleton"
-            style={{ height: 14, width: 180, borderRadius: 4 }}
-          />
+          <div className="skeleton" style={{ height: 14, width: 180, borderRadius: 4 }} />
         ) : (
           <span style={{ fontSize: 12, color: "var(--color-text-secondary)" }}>
-            Showing{" "}
-            <strong style={{ color: "var(--color-text-primary)" }}>
-              {filteredCount}
-            </strong>{" "}
-            of{" "}
-            <strong style={{ color: "rgb(233,34,39)" }}>{groups.length}</strong>{" "}
-            records
-            {search && (
-              <span style={{ color: "var(--color-text-muted)" }}>
-                {" "}— filtered by &ldquo;{search}&rdquo;
-              </span>
+            {viewMode === "tree" ? (
+              <>
+                Đang hiển thị{" "}
+                <strong style={{ color: "var(--color-text-primary)" }}>
+                  cây phân cấp
+                </strong>{" "}
+                —{" "}
+                <strong style={{ color: "rgb(233,34,39)" }}>{groups.length}</strong>{" "}
+                mục L4 tổng cộng
+              </>
+            ) : (
+              <>
+                Showing{" "}
+                <strong style={{ color: "var(--color-text-primary)" }}>
+                  {filteredCount}
+                </strong>{" "}
+                of{" "}
+                <strong style={{ color: "rgb(233,34,39)" }}>{groups.length}</strong>{" "}
+                records
+                {search && (
+                  <span style={{ color: "var(--color-text-muted)" }}>
+                    {" "}— filtered by &ldquo;{search}&rdquo;
+                  </span>
+                )}
+              </>
             )}
           </span>
         )}
+
+        {/* View mode pill */}
+        <span
+          style={{
+            marginLeft: "auto",
+            fontSize: 11,
+            fontWeight: 600,
+            padding: "2px 10px",
+            borderRadius: 9999,
+            background:
+              viewMode === "tree"
+                ? "rgba(233,34,39,0.08)"
+                : "rgba(59,130,246,0.08)",
+            color: viewMode === "tree" ? "rgb(233,34,39)" : "#2563eb",
+            border:
+              viewMode === "tree"
+                ? "1px solid rgba(233,34,39,0.2)"
+                : "1px solid rgba(59,130,246,0.2)",
+          }}
+        >
+          {viewMode === "tree" ? "Chế độ cây" : "Chế độ bảng"}
+        </span>
       </div>
 
-      {/* ── Body: table fills remaining space, manages its own scroll ── */}
+      {/* ── Body ── */}
       <div
         style={{
           flex: 1,
@@ -386,16 +379,36 @@ export function EquipmentGroupPageClient() {
           borderTop: "1px solid var(--color-border)",
         }}
       >
-        <EquipmentGroupTable
-          data={groups}
-          isLoading={isLoading}
-          globalFilter={search}
-          onEdit={handleEdit}
-          onDelete={handleDeleteRequest}
-          onFilteredCountChange={setFilteredCount}
-          onSelectionChange={setSelectedGroups}
-        />
+        {viewMode === "tree" ? (
+          <EquipmentGroupTreeTable
+            data={groups}
+            isLoading={isLoading}
+            globalFilter={search}
+            selectedNodeId={selectedNode?.id ?? null}
+            onNodeSelect={handleNodeSelect}
+            onEdit={handleEdit}
+            onDelete={handleDeleteRequest}
+          />
+        ) : (
+          <EquipmentGroupTable
+            data={groups}
+            isLoading={isLoading}
+            globalFilter={search}
+            onEdit={handleEdit}
+            onDelete={handleDeleteRequest}
+            onFilteredCountChange={setFilteredCount}
+            onSelectionChange={setSelectedGroups}
+          />
+        )}
       </div>
+
+      {/* ── Detail Panel (tree mode only) ── */}
+      <EquipmentGroupDetailPanel
+        record={selectedNode?.record ?? null}
+        onClose={() => setSelectedNode(null)}
+        onEdit={handleEdit}
+        onDelete={handleDeleteRequest}
+      />
 
       {/* ── Dialogs ── */}
       <EquipmentGroupDialog
@@ -421,156 +434,6 @@ export function EquipmentGroupPageClient() {
         onOpenChange={setDeleteOpen}
         onConfirm={handleDeleteConfirm}
       />
-
-      {/* ── Bulk delete confirmation overlay ── */}
-      {bulkDeleteOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "rgba(0,0,0,0.45)",
-            backdropFilter: "blur(4px)",
-          }}
-          onClick={() => !isBulkDeleting && setBulkDeleteOpen(false)}
-        >
-          <div
-            style={{
-              background: "var(--color-surface)",
-              border: "1px solid var(--color-border)",
-              borderRadius: 14,
-              padding: "28px 28px 22px",
-              maxWidth: 420,
-              width: "90%",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 16 }}>
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  background: "rgba(239,68,68,0.1)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <Trash2 size={18} style={{ color: "#ef4444" }} />
-              </div>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>
-                  Xoá {selectedGroups.length} nhóm thiết bị
-                </div>
-                <div style={{ fontSize: 13, color: "var(--color-text-secondary)", lineHeight: 1.5 }}>
-                  Hành động này không thể hoàn tác. Tất cả{" "}
-                  <strong style={{ color: "var(--color-text-primary)" }}>
-                    {selectedGroups.length} nhóm
-                  </strong>{" "}
-                  đã chọn sẽ bị xoá vĩnh viễn.
-                </div>
-              </div>
-            </div>
-
-            {/* Preview list (max 5) */}
-            <div
-              style={{
-                background: "var(--color-surface-2)",
-                border: "1px solid var(--color-border)",
-                borderRadius: 8,
-                padding: "10px 12px",
-                marginBottom: 20,
-                maxHeight: 140,
-                overflowY: "auto",
-              }}
-            >
-              {selectedGroups.slice(0, 5).map((g) => (
-                <div
-                  key={g._id}
-                  style={{
-                    fontSize: 12,
-                    color: "var(--color-text-secondary)",
-                    padding: "3px 0",
-                    borderBottom: "1px solid var(--color-border)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                  }}
-                >
-                  <span
-                    style={{
-                      width: 5,
-                      height: 5,
-                      borderRadius: "50%",
-                      background: "rgb(233,34,39)",
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {g.fullPath}
-                  </span>
-                </div>
-              ))}
-              {selectedGroups.length > 5 && (
-                <div
-                  style={{
-                    fontSize: 12,
-                    color: "var(--color-text-muted)",
-                    paddingTop: 6,
-                    fontStyle: "italic",
-                  }}
-                >
-                  ...và {selectedGroups.length - 5} nhóm khác
-                </div>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-              <button
-                onClick={() => setBulkDeleteOpen(false)}
-                disabled={isBulkDeleting}
-                className="btn-ghost"
-                style={{ height: 36, opacity: isBulkDeleting ? 0.5 : 1 }}
-              >
-                <X size={14} />
-                Huỷ
-              </button>
-              <button
-                onClick={handleBulkDelete}
-                disabled={isBulkDeleting}
-                style={{
-                  height: 36,
-                  padding: "0 18px",
-                  background: isBulkDeleting ? "#f87171" : "#ef4444",
-                  color: "white",
-                  border: "none",
-                  borderRadius: 8,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  cursor: isBulkDeleting ? "not-allowed" : "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 7,
-                  transition: "background 0.15s",
-                }}
-              >
-                <Trash2 size={14} />
-                {isBulkDeleting
-                  ? `Đang xoá...`
-                  : `Xoá ${selectedGroups.length} nhóm`}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

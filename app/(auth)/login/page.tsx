@@ -8,7 +8,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-background flex items-center justify-center ">
       {/* Main Container */}
       <div
-        className=" grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12"
         style={{
           background: "#fff",
           borderRadius: 18,

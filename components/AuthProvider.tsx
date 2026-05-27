@@ -3,8 +3,6 @@
 import { useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useAuthStore } from "@/lib/store/useAuthStore";
-import { redirect, usePathname } from "next/navigation";
-import { useRouter } from "next/router";
 
 export default function AuthProvider({
   children,

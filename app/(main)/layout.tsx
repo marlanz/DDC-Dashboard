@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
-import AppShell from "@/components/AppShell";
+import ThemProvider from "@/components/AppShell";
 import AuthProvider from "@/components/AuthProvider";
 import { AppToaster } from "@/components/providers/app-toaster";
+import ThemeProvider from "@/components/AppShell";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -30,7 +31,7 @@ export default function RootLayout({
     >
       <body className="h-full antialiased">
         <AuthProvider>
-          <AppShell>{children}</AppShell>
+          <ThemeProvider>{children}</ThemeProvider>
           <AppToaster />
         </AuthProvider>
       </body>
