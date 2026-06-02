@@ -21,7 +21,7 @@ export const EQUIPMENT_STATUSES = {
   maintenance: {
     color: "#f59e0b",
     bg: "rgba(245,158,11,0.1)",
-    translate: "Bảo trì",
+    translate: "Đang bảo trì",
     badgeCls: "badge-maintenance",
   },
   inactive: {
@@ -66,11 +66,13 @@ export interface EquipmentStatusMeta {
  * Ready-to-use option list for filter dropdowns and select inputs.
  * Generated automatically — do NOT maintain manually.
  */
-export const EQUIPMENT_STATUS_OPTIONS: { value: EquipmentStatus; label: string }[] =
-  (Object.keys(EQUIPMENT_STATUSES) as EquipmentStatus[]).map((key) => ({
-    value: key,
-    label: EQUIPMENT_STATUSES[key].translate,
-  }));
+export const EQUIPMENT_STATUS_OPTIONS: {
+  value: EquipmentStatus;
+  label: string;
+}[] = (Object.keys(EQUIPMENT_STATUSES) as EquipmentStatus[]).map((key) => ({
+  value: key,
+  label: EQUIPMENT_STATUSES[key].translate,
+}));
 
 // ---------------------------------------------------------------------------
 // Helper functions

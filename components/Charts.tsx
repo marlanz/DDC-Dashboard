@@ -12,7 +12,6 @@ import {
   Legend,
 } from "recharts";
 
-
 const BRAND = "rgb(233,34,39)";
 const COLORS = [
   BRAND,
@@ -24,6 +23,24 @@ const COLORS = [
   "#06b6d4",
   "#ec4899",
 ];
+
+// A reusable label renderer for vertical bars
+const VerticalBarLabel = (props: any) => {
+  const { x, y, width, value, total } = props;
+  if (!value || !total) return null;
+  const pct = ((value / total) * 100).toFixed(2);
+  return (
+    <text
+      x={x + width / 2}
+      y={y - 6}
+      textAnchor="middle"
+      fontSize={11}
+      fill="var(--color-text-secondary)"
+    >
+      {value} ({pct}%)
+    </text>
+  );
+};
 
 interface ChartCardProps {
   title: string;
@@ -137,6 +154,9 @@ interface ByFactoryProps {
   data: { factory: string; count: number }[];
 }
 export function EquipmentByFactoryChart({ data }: ByFactoryProps) {
+  const total = data.reduce((sum, d) => sum + d.count, 0);
+  // console.log("data: ", data.length);
+
   return (
     <ChartCard
       title="Thống kê thiết bị theo nhà máy"
@@ -176,6 +196,7 @@ export function EquipmentByFactoryChart({ data }: ByFactoryProps) {
             maxBarSize={48}
             isAnimationActive
             animationDuration={800}
+            label={<VerticalBarLabel total={total} />}
           />
         </BarChart>
       </ResponsiveContainer>
@@ -210,8 +231,8 @@ export function StatusDistributionChart({ data }: StatusProps) {
             tickLine={false}
             axisLine={false}
             interval={0}
-            angle={-20}
-            textAnchor="end"
+            // angle={-20}
+            textAnchor="middle"
           />
           <YAxis
             tick={{ fontSize: 12, fill: "var(--color-text-secondary)" }}

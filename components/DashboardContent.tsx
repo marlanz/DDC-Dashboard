@@ -96,6 +96,9 @@ export default function DashboardContent({
     const totalWorkCenters = new Set(
       filtered.map((d) => d.organization.workCenter),
     ).size;
+    const totalRegisteredEquipment = initialData.filter(
+      (d) => d.status !== "pending-investment",
+    ).length;
     const activeEquipment = filtered.filter(
       (d) => (d.status || "active") === "active",
     ).length;
@@ -107,6 +110,7 @@ export default function DashboardContent({
       totalWorkCenters,
       activeEquipment,
       pendingInvestment,
+      totalRegisteredEquipment,
     };
   }, [filtered]);
 
@@ -114,7 +118,9 @@ export default function DashboardContent({
   const byFactory = useMemo(() => {
     const map: Record<string, number> = {};
     filtered.forEach((d) => {
-      map[d.organization.factory] = (map[d.organization.factory] || 0) + 1;
+      const factory = d.organization.factory;
+      if (factory.toLowerCase().includes("dự kiến đầu tư")) return;
+      map[factory] = (map[factory] || 0) + 1;
     });
     return Object.entries(map)
       .map(([factory, count]) => ({ factory, count }))
@@ -129,18 +135,20 @@ export default function DashboardContent({
       counts[s] = (counts[s] || 0) + 1;
     });
     // Build bar chart data from the centralized config (preserves order, skips zero)
-    return (Object.keys(EQUIPMENT_STATUSES) as (keyof typeof EQUIPMENT_STATUSES)[]).flatMap(
-      (key) => {
-        const count = counts[key] ?? 0;
-        if (count === 0) return [];
-        return [{
+    return (
+      Object.keys(EQUIPMENT_STATUSES) as (keyof typeof EQUIPMENT_STATUSES)[]
+    ).flatMap((key) => {
+      const count = counts[key] ?? 0;
+      if (count === 0) return [];
+      return [
+        {
           status: key,
           label: EQUIPMENT_STATUSES[key].translate,
           count,
           color: EQUIPMENT_STATUSES[key].color,
-        }];
-      }
-    );
+        },
+      ];
+    });
   }, [filtered]);
 
   const topGroups = useMemo(() => {
@@ -196,7 +204,7 @@ export default function DashboardContent({
     >
       {/* KPI Cards */}
       <KpiCards
-        totalEquipment={filtered.length}
+        totalEquipment={kpi.totalRegisteredEquipment}
         totalFactories={kpi.totalFactories}
         totalWorkCenters={kpi.totalWorkCenters}
         activeEquipment={kpi.activeEquipment}
