@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+
+const AUTH_STORAGE_KEY = "auth-storage";
 
 type User = {
   id: string;
@@ -17,22 +18,23 @@ type AuthStore = {
   clearUser: () => void;
 };
 
-export const useAuthStore = create<AuthStore>()(
-  persist(
-    (set) => ({
-      user: null,
-      loading: true,
+function removeLegacyAuthStorage() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(AUTH_STORAGE_KEY);
+}
 
-      setUser: (user) => set({ user }),
-      setLoading: (loading) => set({ loading }),
+// Drop stale persisted user from an older build on first load.
+removeLegacyAuthStorage();
 
-      clearUser: () =>
-        set({
-          user: null,
-        }),
-    }),
-    {
-      name: "auth-storage",
-    },
-  ),
-);
+export const useAuthStore = create<AuthStore>()((set) => ({
+  user: null,
+  loading: true,
+
+  setUser: (user) => set({ user }),
+  setLoading: (loading) => set({ loading }),
+
+  clearUser: () => {
+    removeLegacyAuthStorage();
+    set({ user: null, loading: false });
+  },
+}));

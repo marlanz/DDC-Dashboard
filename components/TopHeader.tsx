@@ -1,5 +1,5 @@
 import { Download, Sun, Moon, ChevronDown, LogOut } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import Image from "next/image";
 import { useAuthStore } from "@/lib/store/useAuthStore";
@@ -36,7 +36,6 @@ export default function TopHeader({ darkMode, onToggleDark }: TopHeaderProps) {
   const user = useAuthStore((state) => state.user);
   const clearUser = useAuthStore((state) => state.clearUser);
   const path = usePathname();
-  const router = useRouter();
 
   const avatar = user?.image;
 
@@ -150,10 +149,21 @@ export default function TopHeader({ darkMode, onToggleDark }: TopHeaderProps) {
           <DropdownMenuGroup>
             <DropdownMenuItem
               variant="destructive"
-              onClick={async () => {
-                await authClient.signOut();
+              onSelect={async (event) => {
+                event.preventDefault();
                 clearUser();
-                router.push("/login");
+
+                try {
+                  const { error } = await authClient.signOut();
+                  if (error) {
+                    console.error("Sign out failed:", error);
+                  }
+                } catch (error) {
+                  console.error("Sign out failed:", error);
+                }
+
+                // Full navigation clears Better Auth client cache and re-runs proxy.
+                window.location.assign("/login");
               }}
             >
               <LogOut />

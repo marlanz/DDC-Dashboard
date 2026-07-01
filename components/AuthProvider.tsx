@@ -11,7 +11,7 @@ export default function AuthProvider({
 }) {
   const { data: session, isPending } = authClient.useSession();
 
-  const { setUser, setLoading } = useAuthStore();
+  const { setUser, setLoading, clearUser } = useAuthStore();
 
   useEffect(() => {
     if (isPending) return;
@@ -23,12 +23,12 @@ export default function AuthProvider({
         email: session.user.email,
         image: session.user.image,
       });
-    } else {
-      setUser(null);
+      setLoading(false);
+      return;
     }
 
-    setLoading(false);
-  }, [session, isPending, setUser, setLoading]);
+    clearUser();
+  }, [session, isPending, setUser, setLoading, clearUser]);
 
   return children;
 }

@@ -48,6 +48,7 @@ export default function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     "/login",
     "/dashboard/:path*",
     "/equipments/:path*",
