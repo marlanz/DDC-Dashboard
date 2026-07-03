@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { EquipmentGroupPageClient } from "@/app/(main)/equipment-groups/_components/equipment-group-page-client";
+import { EquipmentGroupPageClient } from "./_components/equipment-group-page-client";
 
 export const metadata: Metadata = {
   title: "Nhóm thiết bị | Hệ thống Quản lí thiết bị Cơ khí",

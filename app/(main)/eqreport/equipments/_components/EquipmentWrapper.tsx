@@ -18,18 +18,18 @@ import type {
 import type { Equipment, EquipmentFilters } from "@/types/equipment";
 
 // ── sub-components ──────────────────────────────────────────────────────────
-import EquipmentKpiRow from "@/app/(main)/equipments/_components/EquipmentKpiRow";
-import EquipmentToolbar from "@/app/(main)/equipments/_components/EquipmentToolbar";
+import EquipmentKpiRow from "../_components/EquipmentKpiRow";
+import EquipmentToolbar from "../_components/EquipmentToolbar";
 import EquipmentFilterPanel, {
   EMPTY_FILTERS,
-} from "@/app/(main)/equipments/_components/EquipmentFilterPanel";
-import EquipmentDataTable from "@/app/(main)/equipments/_components/EquipmentDataTable";
-import EquipmentDetailPanel from "@/app/(main)/equipments/_components/EquipmentDetailPanel";
-import ImportJsonModal from "@/app/(main)/equipments/_components/ImportJsonModal";
+} from "../_components/EquipmentFilterPanel";
+import EquipmentDataTable from "../_components/EquipmentDataTable";
+import EquipmentDetailPanel from "../_components/EquipmentDetailPanel";
+import ImportJsonModal from "../_components/ImportJsonModal";
 import ImportExcelModal from "./ImportExcelModal";
-import EquipmentModal from "@/app/(main)/equipments/_components/EquipmentModal";
-import EquipmentKpiSkeleton from "@/app/(main)/equipments/_components/EquipmentKpiSkeleton";
-import EquipmentTableSkeleton from "@/app/(main)/equipments/_components/EquipmentTableSkeleton";
+import EquipmentModal from "../_components/EquipmentModal";
+import EquipmentKpiSkeleton from "../_components/EquipmentKpiSkeleton";
+import EquipmentTableSkeleton from "../_components/EquipmentTableSkeleton";
 import { getEquipmentDocumentId } from "@/lib/equipment/equipmentRowId";
 
 function uniq<T>(arr: T[]): T[] {
@@ -496,7 +496,10 @@ export function EquipmentPageInner() {
               />
             ) : (
               <span
-                style={{ fontSize: "12px", color: "var(--color-text-secondary)" }}
+                style={{
+                  fontSize: "12px",
+                  color: "var(--color-text-secondary)",
+                }}
               >
                 Showing{" "}
                 <strong style={{ color: "var(--color-text-primary)" }}>

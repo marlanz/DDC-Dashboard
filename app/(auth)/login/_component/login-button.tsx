@@ -11,7 +11,7 @@ export default function LoginButton() {
     try {
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/dashboard",
+        callbackURL: "/statistics/dashboard",
         // errorCallbackURL: "/",
       });
     } finally {

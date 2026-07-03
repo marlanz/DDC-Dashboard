@@ -22,14 +22,15 @@ interface TopHeaderProps {
 }
 
 const PAGE_TITLES: Record<string, string> = {
-  "/dashboard": "Bảng thống kê thiết bị",
-  "/equipments": "Danh sách thiết bị",
-  "/factories": "Quản lý nhà máy",
-  "/equipment-groups": "Quản lý nhóm thiết bị",
-  "/maintenance": "Maintenance Schedule",
-  "/reports": "Reports & Analytics",
-  "/import": "Import Excel",
-  "/settings": "System Settings",
+  dashboard: "Bảng thống kê thiết bị",
+  equipments: "Danh sách thiết bị",
+  factories: "Quản lý nhà máy",
+  "equipment-groups": "Quản lý nhóm thiết bị",
+  maintenance: "Maintenance Schedule",
+  reports: "Reports & Analytics",
+  import: "Import Excel",
+  settings: "System Settings",
+  "iot-realtime": "Thống kê dữ liệu máy hàn thời gian thực",
 };
 
 export default function TopHeader({ darkMode, onToggleDark }: TopHeaderProps) {
@@ -38,6 +39,10 @@ export default function TopHeader({ darkMode, onToggleDark }: TopHeaderProps) {
   const path = usePathname();
   const router = useRouter();
   const avatar = user?.image;
+
+  const pathSegments = path.split("/").filter(Boolean);
+
+  const lastSegment = pathSegments[pathSegments.length - 1];
 
   return (
     <header
@@ -60,11 +65,11 @@ export default function TopHeader({ darkMode, onToggleDark }: TopHeaderProps) {
           style={{
             fontSize: "18px",
             fontWeight: 700,
-            color: "var(--color-text-primary)",
+            color: "var(--color-brand)",
             margin: 0,
           }}
         >
-          {PAGE_TITLES[path]}
+          {PAGE_TITLES[lastSegment]}
         </h1>
       </div>
 

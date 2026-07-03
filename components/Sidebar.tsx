@@ -39,7 +39,7 @@ type SidebarGroupItem = {
 
 type MenuItem = "statistics" | "factoryreport" | "eqreport";
 
-const menuGroups: SidebarGroupItem[] = [
+export const menuGroups: SidebarGroupItem[] = [
   {
     id: "statistics",
     title: "Bảng thống kê",
@@ -75,8 +75,12 @@ const menuGroups: SidebarGroupItem[] = [
   },
 ];
 
-const isActivePath = (currentPathname: string, href: string) => {
-  const targetPath = `/${href}`;
+const isActivePath = (
+  currentPathname: string,
+  href: string,
+  parent: string,
+) => {
+  const targetPath = `/${parent}/${href}`;
 
   return (
     currentPathname === targetPath ||
@@ -175,28 +179,10 @@ export default function Sidebar() {
           gap: "2px",
         }}
       >
-        {/* <Link
-          href="/dashboard"
-          className={`sidebar-item${isActivePath(pathname, "dashboard") ? " active" : ""}`}
-          style={{
-            justifyContent: collapsed ? "center" : "flex-start",
-            padding: collapsed ? "8px" : "8px 12px",
-            marginBottom: "2px",
-          }}
-          title={collapsed ? "Bảng thống kê" : undefined}
-        >
-          <LayoutDashboard
-            size={18}
-            strokeWidth={isActivePath(pathname, "dashboard") ? 2.5 : 2}
-            className="icon"
-          />
-          {!collapsed && <span>Bảng thống kê</span>}
-        </Link> */}
-
         {menuGroups.map((group) => {
           const Icon = group.icon;
           const hasActiveChild = group.children.some((child) =>
-            isActivePath(pathname, child.href),
+            isActivePath(pathname, child.href, group.id),
           );
           const isExpanded =
             (expandedGroups[group.id] ?? false) || hasActiveChild;
@@ -246,12 +232,16 @@ export default function Sidebar() {
                   <div className="sidebar-group-content-inner">
                     {group.children.map((item) => {
                       const ChildIcon = item.icon;
-                      const isActive = isActivePath(pathname, item.href);
+                      const isActive = isActivePath(
+                        pathname,
+                        item.href,
+                        group.id,
+                      );
 
                       return (
                         <Link
                           key={item.href}
-                          href={`/${item.href}`}
+                          href={`/${group.id}/${item.href}`}
                           className={`sidebar-item sidebar-child-item${isActive ? " active" : ""}`}
                           style={{
                             justifyContent: "flex-start",

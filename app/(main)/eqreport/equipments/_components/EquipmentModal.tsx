@@ -46,7 +46,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { CascadingGroupSelect } from "@/app/(main)/equipment-groups/_components/cascading-group-select";
+import { CascadingGroupSelect } from "@/app/(main)/eqreport/equipment-groups/_components/cascading-group-select";
+import type { EquipmentGroupSelection } from "@/types/equipment-group";
 import { useEquipmentGroups } from "@/lib/equipment-groups/queries/use-equipment-groups";
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║  ⭐  MOCK DATA fallback while the API is not seeded yet         ║
@@ -264,7 +265,7 @@ export default function EquipmentModal({
                   <CascadingGroupSelect
                     groups={equipmentGroups}
                     value={groupValue}
-                    onChange={(sel) => {
+                    onChange={(sel: EquipmentGroupSelection) => {
                       form.setValue("equipmentGroup.level1", sel.level1, {
                         shouldValidate: true,
                       });

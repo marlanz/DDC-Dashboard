@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
+const defaultChildRoutes: Record<string, string> = {
+  "/statistics": "/statistics/dashboard",
+  "/factoryreport": "/factoryreport/electricity",
+  "/eqreport": "/eqreport/overall",
+};
+
 export default function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
 
@@ -35,12 +41,19 @@ export default function proxy(request: NextRequest) {
 
   // User đã login mà vào "/"
   if (pathname === "/" && isLoggedIn) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/statistics/dashboard", request.url));
   }
 
   // Đã login mà vẫn vào login
   if (pathname === "/login" && isLoggedIn) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/statistics/dashboard", request.url));
+  }
+
+  //nếu user chỉ access parent url mà không provide children thì sẽ mặc định children ở [0]
+  if (pathname in defaultChildRoutes) {
+    return NextResponse.redirect(
+      new URL(defaultChildRoutes[pathname], request.url),
+    );
   }
 
   return NextResponse.next();
@@ -58,5 +71,6 @@ export const config = {
     "/reports/:path*",
     "/settings/:path*",
     "/equipment-groups/:path*",
+    "/statistics/:path",
   ],
 };
