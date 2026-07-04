@@ -15,7 +15,7 @@ export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const protectedRoutes = [
-    "/dashboard",
+    // "/dashboard",
     "/equipments",
     "/equipment-groups",
     "/factories",
@@ -23,6 +23,9 @@ export default function proxy(request: NextRequest) {
     "/maintenance",
     "/reports",
     "/settings",
+    "/eqreport", //has chilldren but can't block unauthenticated user
+    "/factoryreport", //has chilldren but can't block unauthenticated user
+    "/statistics", //has chilldren but can't block unauthenticated user
   ];
 
   const isProtectedRoute = protectedRoutes.some((route) =>
@@ -71,6 +74,8 @@ export const config = {
     "/reports/:path*",
     "/settings/:path*",
     "/equipment-groups/:path*",
-    "/statistics/:path",
+    "/statistics",
+    "/factoryreport",
+    "/eqreport",
   ],
 };
